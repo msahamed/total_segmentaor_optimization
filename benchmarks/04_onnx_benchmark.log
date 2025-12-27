@@ -1,0 +1,87 @@
+======================================================================
+ESTABLISHING ONNX BASELINE (PYTHON + ORT CPU)
+======================================================================
+
+[1/20] Processing Root: msd_spleen_spleen_3.nii.gz
+  Latency: 4.00s (Inf: 2.79s)
+  Organs Detected: 60
+
+[2/20] Processing Root: ct_philips.nii.gz
+  Latency: 1.69s (Inf: 1.00s)
+  Organs Detected: 13
+
+[3/20] Processing Root: msd_spleen_spleen_40.nii.gz
+  Latency: 7.20s (Inf: 4.61s)
+  Organs Detected: 85
+
+[4/20] Processing Root: msd_spleen_spleen_31.nii.gz
+  Latency: 4.35s (Inf: 2.72s)
+  Organs Detected: 64
+
+[5/20] Processing Root: msd_spleen_spleen_52.nii.gz
+  Latency: 10.35s (Inf: 7.27s)
+  Organs Detected: 72
+
+[6/20] Processing Root: msd_spleen_spleen_19.nii.gz
+  Latency: 5.95s (Inf: 4.67s)
+  Organs Detected: 53
+
+[7/20] Processing Root: ct_abdomen.nii.gz
+  Latency: 4.38s (Inf: 3.05s)
+  Organs Detected: 87
+
+[8/20] Processing Learn2Reg: case_001_exp.nii.gz
+  Latency: 3.98s (Inf: 3.01s)
+  Organs Detected: 53
+
+[9/20] Processing Learn2Reg: case_001_insp.nii.gz
+  Latency: 3.80s (Inf: 2.83s)
+  Organs Detected: 84
+
+[10/20] Processing Learn2Reg: case_002_exp.nii.gz
+  Latency: 3.90s (Inf: 2.91s)
+  Organs Detected: 58
+
+[11/20] Processing Learn2Reg: case_002_insp.nii.gz
+  Latency: 3.84s (Inf: 2.85s)
+  Organs Detected: 84
+
+[12/20] Processing Learn2Reg: case_003_exp.nii.gz
+  Latency: 3.83s (Inf: 2.88s)
+  Organs Detected: 54
+
+[13/20] Processing Learn2Reg: case_003_insp.nii.gz
+  Latency: 3.81s (Inf: 2.83s)
+  Organs Detected: 83
+
+[14/20] Processing Learn2Reg: case_004_exp.nii.gz
+  Latency: 4.62s (Inf: 3.34s)
+  Organs Detected: 57
+
+[15/20] Processing Learn2Reg: case_004_insp.nii.gz
+  Latency: 4.28s (Inf: 3.05s)
+  Organs Detected: 87
+
+[16/20] Processing Learn2Reg: case_005_exp.nii.gz
+  Latency: 4.17s (Inf: 3.20s)
+  Organs Detected: 55
+
+[17/20] Processing Learn2Reg: case_005_insp.nii.gz
+  Latency: 4.41s (Inf: 3.32s)
+  Organs Detected: 85
+
+[18/20] Processing Learn2Reg: case_006_exp.nii.gz
+  Latency: 4.06s (Inf: 3.05s)
+  Organs Detected: 57
+
+[19/20] Processing Learn2Reg: case_006_insp.nii.gz
+  Latency: 4.23s (Inf: 3.23s)
+  Organs Detected: 82
+
+[20/20] Processing Learn2Reg: case_007_exp.nii.gz
+  Latency: 4.18s (Inf: 3.21s)
+  Organs Detected: 57
+
+======================================================================
+BENCHMARK COMPLETE. Saved to 'benchmarks/onnx_ground_truth.json'
+======================================================================

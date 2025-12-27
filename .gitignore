@@ -1,0 +1,40 @@
+# OS junk
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+.pytest_cache/
+.coverage
+.mypy_cache/
+
+# Rust
+rust/target/
+Cargo.lock
+
+# TotalSegmentator Data & Models
+ct_data/
+models/*.onnx
+models/*.pth
+registration/
+*.nii.gz
+
+# Benchmarks
+benchmarks/masks/
+benchmarks/*.json
+# Keep the markdown report files
+!benchmarks/*.md
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+.claude

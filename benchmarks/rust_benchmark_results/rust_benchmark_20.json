@@ -1,0 +1,122 @@
+[
+    {
+        "subject": "msd_spleen_spleen_3.nii.gz",
+        "latency": 9.569784879684448,
+        "dice": 0.8622009882283158,
+        "num_organs": 60
+    },
+    {
+        "subject": "ct_philips.nii.gz",
+        "latency": 2.9190731048583984,
+        "dice": 0.6651630450145821,
+        "num_organs": 13
+    },
+    {
+        "subject": "msd_spleen_spleen_40.nii.gz",
+        "latency": 14.602306127548218,
+        "dice": 0.8696072240084295,
+        "num_organs": 85
+    },
+    {
+        "subject": "msd_spleen_spleen_31.nii.gz",
+        "latency": 8.795207023620605,
+        "dice": 0.8501612062481949,
+        "num_organs": 65
+    },
+    {
+        "subject": "msd_spleen_spleen_52.nii.gz",
+        "latency": 25.622096061706543,
+        "dice": 0.8980551638447515,
+        "num_organs": 72
+    },
+    {
+        "subject": "msd_spleen_spleen_19.nii.gz",
+        "latency": 10.173111200332642,
+        "dice": 0.8254092655425629,
+        "num_organs": 53
+    },
+    {
+        "subject": "ct_abdomen.nii.gz",
+        "latency": 7.1133739948272705,
+        "dice": 0.8971630508224709,
+        "num_organs": 87
+    },
+    {
+        "subject": "case_001_exp.nii.gz",
+        "latency": 7.0530619621276855,
+        "dice": 0.8591553860016108,
+        "num_organs": 54
+    },
+    {
+        "subject": "case_001_insp.nii.gz",
+        "latency": 6.961755037307739,
+        "dice": 0.8698513760091455,
+        "num_organs": 83
+    },
+    {
+        "subject": "case_002_exp.nii.gz",
+        "latency": 6.749097108840942,
+        "dice": 0.8326446793409763,
+        "num_organs": 58
+    },
+    {
+        "subject": "case_002_insp.nii.gz",
+        "latency": 6.904344797134399,
+        "dice": 0.9010077999983256,
+        "num_organs": 84
+    },
+    {
+        "subject": "case_003_exp.nii.gz",
+        "latency": 7.552286863327026,
+        "dice": 0.8007036096142494,
+        "num_organs": 54
+    },
+    {
+        "subject": "case_003_insp.nii.gz",
+        "latency": 7.862761974334717,
+        "dice": 0.890473286310424,
+        "num_organs": 83
+    },
+    {
+        "subject": "case_004_exp.nii.gz",
+        "latency": 9.76695990562439,
+        "dice": 0.7828061588630432,
+        "num_organs": 57
+    },
+    {
+        "subject": "case_004_insp.nii.gz",
+        "latency": 9.151772022247314,
+        "dice": 0.8551078651827787,
+        "num_organs": 86
+    },
+    {
+        "subject": "case_005_exp.nii.gz",
+        "latency": 16.101614713668823,
+        "dice": 0.8277991654249863,
+        "num_organs": 55
+    },
+    {
+        "subject": "case_005_insp.nii.gz",
+        "latency": 11.101706743240356,
+        "dice": 0.8895566194003851,
+        "num_organs": 85
+    },
+    {
+        "subject": "case_006_exp.nii.gz",
+        "latency": 10.909127950668335,
+        "dice": 0.821193997812021,
+        "num_organs": 56
+    },
+    {
+        "subject": "case_006_insp.nii.gz",
+        "latency": 8.63889217376709,
+        "dice": 0.8752475135385974,
+        "num_organs": 82
+    },
+    {
+        "subject": "case_007_exp.nii.gz",
+        "latency": 10.083121061325073,
+        "dice": 0.8347735248948523,
+        "num_organs": 58
+    }
+]

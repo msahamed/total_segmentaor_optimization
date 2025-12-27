@@ -1,0 +1,189 @@
+2025-12-26 10:10:13,988 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:10:29,548 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:11:04,814 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:11:21,090 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:11:38,592 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:11:55,491 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:12:38,393 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:12:56,394 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:13:22,399 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:13:39,874 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:15:05,934 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:15:21,935 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:15:59,109 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:16:13,880 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:16:43,505 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:17:00,623 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:17:23,074 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:17:43,268 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:18:22,480 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:19:04,901 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:19:21,883 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:19:35,739 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:19:58,679 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:20:12,404 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:20:23,382 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:20:36,983 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:20:59,232 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:21:21,528 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:21:32,775 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:21:45,538 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:21:56,073 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:22:09,276 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:22:19,368 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:22:32,552 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:22:52,586 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:23:05,996 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:23:16,090 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:23:29,250 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:23:52,832 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:24:37,605 - INFO - NumExpr defaulting to 8 threads.
+2025-12-26 10:24:51,589 - INFO - NumExpr defaulting to 8 threads.
+======================================================================
+ESTABLISHING VANILLA GROUND TRUTH (SAVING MASKS)
+======================================================================
+
+[1/20] Processing Root: msd_spleen_spleen_3.nii.gz
+No GPU detected. Running on CPU. This can be very slow. The '--fast' or the `--roi_subset` option can help to reduce runtime.
+  Shape: (512, 512, 40)
+  Latency: 53.70s
+  Organs Detected: 58
+  Saved to: msd_spleen_spleen_3.nii_mask.nii.gz
+
+[2/20] Processing Root: ct_philips.nii.gz
+No GPU detected. Running on CPU. This can be very slow. The '--fast' or the `--roi_subset` option can help to reduce runtime.
+  Shape: (185, 232, 256)
+  Latency: 33.38s
+  Organs Detected: 13
+  Saved to: ct_philips.nii_mask.nii.gz
+
+[3/20] Processing Root: msd_spleen_spleen_40.nii.gz
+No GPU detected. Running on CPU. This can be very slow. The '--fast' or the `--roi_subset` option can help to reduce runtime.
+  Shape: (512, 512, 93)
+  Latency: 61.13s
+  Organs Detected: 85
+  Saved to: msd_spleen_spleen_40.nii_mask.nii.gz
+
+[4/20] Processing Root: msd_spleen_spleen_31.nii.gz
+No GPU detected. Running on CPU. This can be very slow. The '--fast' or the `--roi_subset` option can help to reduce runtime.
+  Shape: (512, 512, 56)
+  Latency: 42.62s
+  Organs Detected: 67
+  Saved to: msd_spleen_spleen_31.nii_mask.nii.gz
+
+[5/20] Processing Root: msd_spleen_spleen_52.nii.gz
+No GPU detected. Running on CPU. This can be very slow. The '--fast' or the `--roi_subset` option can help to reduce runtime.
+  Shape: (512, 512, 112)
+  Latency: 104.56s
+  Organs Detected: 72
+  Saved to: msd_spleen_spleen_52.nii_mask.nii.gz
+
+[6/20] Processing Root: msd_spleen_spleen_19.nii.gz
+No GPU detected. Running on CPU. This can be very slow. The '--fast' or the `--roi_subset` option can help to reduce runtime.
+  Shape: (512, 512, 51)
+  Latency: 51.65s
+  Organs Detected: 56
+  Saved to: msd_spleen_spleen_19.nii_mask.nii.gz
+
+[7/20] Processing Root: ct_abdomen.nii.gz
+No GPU detected. Running on CPU. This can be very slow. The '--fast' or the `--roi_subset` option can help to reduce runtime.
+  Shape: (255, 178, 256)
+  Latency: 44.07s
+  Organs Detected: 87
+  Saved to: ct_abdomen.nii_mask.nii.gz
+
+[8/20] Processing Learn2Reg: case_001_exp.nii.gz
+No GPU detected. Running on CPU. This can be very slow. The '--fast' or the `--roi_subset` option can help to reduce runtime.
+  Shape: (192, 192, 208)
+  Latency: 39.12s
+  Organs Detected: 54
+  Saved to: case_001_exp.nii_mask.nii.gz
+
+[9/20] Processing Learn2Reg: case_001_insp.nii.gz
+No GPU detected. Running on CPU. This can be very slow. The '--fast' or the `--roi_subset` option can help to reduce runtime.
+  Shape: (192, 192, 208)
+  Latency: 60.19s
+  Organs Detected: 85
+  Saved to: case_001_insp.nii_mask.nii.gz
+
+[10/20] Processing Learn2Reg: case_002_exp.nii.gz
+No GPU detected. Running on CPU. This can be very slow. The '--fast' or the `--roi_subset` option can help to reduce runtime.
+  Shape: (192, 192, 208)
+  Latency: 58.40s
+  Organs Detected: 59
+  Saved to: case_002_exp.nii_mask.nii.gz
+
+[11/20] Processing Learn2Reg: case_002_insp.nii.gz
+No GPU detected. Running on CPU. This can be very slow. The '--fast' or the `--roi_subset` option can help to reduce runtime.
+  Shape: (192, 192, 208)
+  Latency: 36.83s
+  Organs Detected: 84
+  Saved to: case_002_insp.nii_mask.nii.gz
+
+[12/20] Processing Learn2Reg: case_003_exp.nii.gz
+No GPU detected. Running on CPU. This can be very slow. The '--fast' or the `--roi_subset` option can help to reduce runtime.
+  Shape: (192, 192, 208)
+  Latency: 24.33s
+  Organs Detected: 55
+  Saved to: case_003_exp.nii_mask.nii.gz
+
+[13/20] Processing Learn2Reg: case_003_insp.nii.gz
+No GPU detected. Running on CPU. This can be very slow. The '--fast' or the `--roi_subset` option can help to reduce runtime.
+  Shape: (192, 192, 208)
+  Latency: 35.90s
+  Organs Detected: 83
+  Saved to: case_003_insp.nii_mask.nii.gz
+
+[14/20] Processing Learn2Reg: case_004_exp.nii.gz
+No GPU detected. Running on CPU. This can be very slow. The '--fast' or the `--roi_subset` option can help to reduce runtime.
+  Shape: (192, 192, 208)
+  Latency: 33.15s
+  Organs Detected: 59
+  Saved to: case_004_exp.nii_mask.nii.gz
+
+[15/20] Processing Learn2Reg: case_004_insp.nii.gz
+No GPU detected. Running on CPU. This can be very slow. The '--fast' or the `--roi_subset` option can help to reduce runtime.
+  Shape: (192, 192, 208)
+  Latency: 23.32s
+  Organs Detected: 86
+  Saved to: case_004_insp.nii_mask.nii.gz
+
+[16/20] Processing Learn2Reg: case_005_exp.nii.gz
+No GPU detected. Running on CPU. This can be very slow. The '--fast' or the `--roi_subset` option can help to reduce runtime.
+  Shape: (192, 192, 208)
+  Latency: 23.21s
+  Organs Detected: 55
+  Saved to: case_005_exp.nii_mask.nii.gz
+
+[17/20] Processing Learn2Reg: case_005_insp.nii.gz
+No GPU detected. Running on CPU. This can be very slow. The '--fast' or the `--roi_subset` option can help to reduce runtime.
+  Shape: (192, 192, 208)
+  Latency: 33.33s
+  Organs Detected: 85
+  Saved to: case_005_insp.nii_mask.nii.gz
+
+[18/20] Processing Learn2Reg: case_006_exp.nii.gz
+No GPU detected. Running on CPU. This can be very slow. The '--fast' or the `--roi_subset` option can help to reduce runtime.
+  Shape: (192, 192, 208)
+  Latency: 23.08s
+  Organs Detected: 55
+  Saved to: case_006_exp.nii_mask.nii.gz
+
+[19/20] Processing Learn2Reg: case_006_insp.nii.gz
+No GPU detected. Running on CPU. This can be very slow. The '--fast' or the `--roi_subset` option can help to reduce runtime.
+  Shape: (192, 192, 208)
+  Latency: 37.28s
+  Organs Detected: 82
+  Saved to: case_006_insp.nii_mask.nii.gz
+
+[20/20] Processing Learn2Reg: case_007_exp.nii.gz
+No GPU detected. Running on CPU. This can be very slow. The '--fast' or the `--roi_subset` option can help to reduce runtime.
+  Shape: (192, 192, 208)
+  Latency: 58.27s
+  Organs Detected: 57
+  Saved to: case_007_exp.nii_mask.nii.gz
+
+======================================================================
+BENCHMARK COMPLETE. Results: 'benchmarks/vanilla_ground_truth.json'
+Masks stored in: 'benchmarks/vanilla_benchmark_results/masks/'
+======================================================================
