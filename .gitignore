@@ -26,11 +26,28 @@ models/*.pth
 registration/
 *.nii.gz
 
-# Benchmarks
+# Benchmarks - Output Directories
 benchmarks/masks/
-benchmarks/*.json
-# Keep the markdown report files
+benchmarks/vanilla_results/
+benchmarks/onnx_results/
+benchmarks/optimized_results/
+benchmarks/controlled_inference_results/
+benchmarks/inference_and_passport_results/
+benchmarks/**/*.json
+benchmarks/**/*.nii.gz
+benchmarks/**/passports/
+benchmarks/**/masks/
+
+# Keep benchmark documentation
 !benchmarks/*.md
+!benchmarks/**/*.md
+
+# Diagnostic/Temporary Scripts (not production code)
+06b_*.py
+06c_*.py
+*_test.py
+*_debug.py
+*_diagnostic.py
 
 # IDEs
 .vscode/
