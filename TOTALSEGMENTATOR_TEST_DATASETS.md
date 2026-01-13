@@ -245,7 +245,7 @@ python tests/test_totalsegmentator.py
 ```
 
 **Compare:**
-- Official PyTorch results vs your ONNX results
+- Official PyTorch results vs ONNX results
 - Verify Dice scores match within ±0.02
 - Validate organ count consistency
 
