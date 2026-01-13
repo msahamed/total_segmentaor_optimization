@@ -24,18 +24,24 @@
 For evaluators who want to run immediately:
 
 ```bash
-# 1. Ensure ONNX model exists
-ls models/totalsegmentator_total_fast_fp32.onnx
+# 1. Clone the repository (model is already included!)
+git clone <repository-url>
+cd total_segmentator
 
-# 2. Place your CT scans in ct_data/ directory
+# 2. Install dependencies
+pip install numpy scipy nibabel onnxruntime totalsegmentator
+
+# 3. Place your CT scans in ct_data/ directory
 cp your_ct_scan.nii.gz ct_data/
 
-# 3. Run the benchmark (default: 20 scans)
+# 4. Run the benchmark (default: 20 scans)
 python 06_inferenceAndPassport.py
 
-# 4. Check results
+# 5. Check results
 cat benchmarks/inference_and_passport_results/benchmark_results.json
 ```
+
+**Note:** The ONNX model (`totalsegmentator_total_fast_fp32.onnx`, 66MB) is already included in the repository!
 
 ---
 
@@ -84,21 +90,22 @@ pip install totalsegmentator
 - `onnxruntime`: ONNX model inference
 - `totalsegmentator`: Official library (for resampling functions)
 
-### Step 2: Download the ONNX Model
+### Step 2: ONNX Model (Included)
 
-If you don't have the model, export it using:
+✅ **The ONNX model is already included in this repository!**
 
-```bash
-python 02_export_model.py
-```
-
-This creates: `models/totalsegmentator_total_fast_fp32.onnx`
+The pre-exported model is located at: `models/totalsegmentator_total_fast_fp32.onnx`
 
 **Model Specifications:**
 - Format: ONNX FP32
 - Input: 3mm isotropic CT volumes
 - Output: 118 anatomical labels
-- Size: ~500MB
+- Size: 66MB
+
+**Note:** If you need to re-export the model for any reason, you can run:
+```bash
+python 02_export_model.py
+```
 
 ---
 
@@ -107,6 +114,26 @@ This creates: `models/totalsegmentator_total_fast_fp32.onnx`
 ### Supported Data Format
 
 The script accepts **NIfTI format** (`.nii.gz` or `.nii`) CT scans.
+
+### Download Benchmark Dataset (Optional)
+
+To replicate the exact N=49 comprehensive validation, download the complete benchmark dataset:
+
+📥 **Google Drive:** [Download Benchmark Dataset](https://drive.google.com/file/d/1g_a08EMAG1NTAWM5m2JV4mPgCcSqDuJs/view?usp=sharing)
+
+**Dataset Contents:**
+- **MSD Spleen (Task09):** 5 subjects
+- **Learn2Reg Challenge:** 42 subjects (21 paired exp/insp)
+- **Custom samples:** 2 subjects
+
+**Installation:**
+```bash
+# Download and extract the dataset
+# Place contents in ct_data/ directory
+unzip benchmark_dataset.zip -d ct_data/
+```
+
+**Note:** This is optional. You can use your own CT scans for testing.
 
 ### Directory Structure
 

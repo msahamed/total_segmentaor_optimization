@@ -41,6 +41,22 @@ TotalSegmentator uses **two primary public datasets** for evaluation:
 
 ## 📁 Official Test Datasets
 
+### 📥 Complete Benchmark Dataset Download
+
+The complete N=49 benchmark dataset used in this study is available for download:
+
+**Google Drive:** [Download Complete Benchmark Dataset](https://drive.google.com/file/d/1g_a08EMAG1NTAWM5m2JV4mPgCcSqDuJs/view?usp=sharing)
+
+**Contents:**
+- MSD Spleen (Task09): 5 subjects
+- Learn2Reg Challenge: 42 subjects (21 paired exp/insp)
+- Custom samples: 2 subjects
+- **Total:** 49 CT scans (validated with 100% success rate)
+
+**Usage:** Extract to `ct_data/` directory to replicate the comprehensive validation.
+
+---
+
 ### Dataset 1: Medical Segmentation Decathlon (MSD) - Spleen
 
 **Source:** Medical Segmentation Decathlon Challenge

@@ -33,12 +33,25 @@ The project is organized into sequential scripts:
 ## 📁 Repository Structure
 - `rust/`: Experimental Rust implementation (for study purposes).
 - `benchmarks/`: Comprehensive latency and Dice score reports.
-- `models/`: ONNX model storage.
+- `models/`: ONNX model storage (includes pre-exported `totalsegmentator_total_fast_fp32.onnx`, 66MB).
 - `ct_data/`: (Ignored) Raw medical image data.
 - `registration/`: Metadata-driven registration system for medical imaging.
   - `scripts/`: Registration engine and passport extraction tools.
   - `metadata/`: Pre-computed anatomical passports (centroids, eigenvectors, boundaries).
   - `output/`: Registration results and visualizations.
+
+## 📥 Dataset Download
+
+The complete benchmark dataset (N=49 CT scans) is available for download:
+
+**Google Drive:** [Download Benchmark Dataset](https://drive.google.com/file/d/1g_a08EMAG1NTAWM5m2JV4mPgCcSqDuJs/view?usp=sharing)
+
+**Dataset Contents:**
+- MSD Spleen (Task09): 5 subjects
+- Learn2Reg Challenge: 42 subjects (21 paired exp/insp)
+- Custom samples: 2 subjects
+
+**Usage:** Extract to `ct_data/` directory and run benchmarks.
 
 ## 🔬 Registration Pipeline: Anatomical Passport System
 
