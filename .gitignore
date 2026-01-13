@@ -22,6 +22,7 @@ Cargo.lock
 # TotalSegmentator Data & Models
 ct_data/
 models/*.onnx
+!models/totalsegmentator_total_fast_fp32.onnx  # Include production model (66MB)
 models/*.pth
 registration/
 *.nii.gz
