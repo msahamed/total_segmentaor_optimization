@@ -28,7 +28,8 @@ The project is organized into sequential scripts:
 4.  **`04_onnx_benchmark.py`**: Baselines the standard Python ONNX Runtime implementation.
 5.  **`05_optimized_python_benchmark.py`**: Demonstrates 30-50% speedups via session tuning and resampling efficiency.
 6.  **`06_inferenceAndPassport.py`**: Combines optimized inference with anatomical passport extraction for registration pipelines. **[See Testing Guide](TESTING_GUIDE.md) for evaluator instructions.**
-7.  **`06_linux_production_benchmark.py`**: Final production-ready script for Linux/AMD environments (includes `taskset` tuning).
+7.  **`07_compare_vanilla_vs_optimized.py`**: Compares the results from `03_vanilla_benchmark.py` and `06_inferenceAndPassport.py` to calculate speedup and accuracy (Dice score).
+8.  **`06_linux_production_benchmark.py`**: Final production-ready script for Linux/AMD environments (includes `taskset` tuning).
 
 ## 📁 Repository Structure
 - `rust/`: Experimental Rust implementation (for study purposes).
@@ -199,6 +200,9 @@ The testing guide includes:
 
 ## 💡 Recommendation
 For production deployment, use the **Optimized Python-ONNX** pipeline. It provides a **4.4x speedup** over Vanilla PyTorch while maintaining clinical accuracy (>0.90 Dice).
+
+> **Verify it yourself:** You can run `python 07_compare_vanilla_vs_optimized.py` (after running benchmarks 03 and 06) to generate a customized performance report for your specific hardware.
+
 
 **Validated Performance:**
 - **Average: ~10 seconds** per CT scan

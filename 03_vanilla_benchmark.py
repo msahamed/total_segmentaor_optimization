@@ -12,32 +12,32 @@ from totalsegmentator.python_api import totalsegmentator
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-def find_datasets(base_dir):
+def find_datasets(base_dir, max_samples=20):
     datasets = []
     
     # 1. Root ct_data
     for f in base_dir.glob("*.nii.gz"):
         datasets.append(("Root", f))
-        if len(datasets) >= 20:
+        if len(datasets) >= max_samples:
             break
             
     # 2. learn2reg/scans (if more needed)
-    if len(datasets) < 20:
+    if len(datasets) < max_samples:
         l2r_dir = base_dir / "learn2reg" / "scans"
         if l2r_dir.exists():
             for f in sorted(l2r_dir.glob("*.nii.gz")):
                 datasets.append(("Learn2Reg", f))
-                if len(datasets) >= 20:
+                if len(datasets) >= max_samples:
                     break
             
     return datasets
 
-def run_benchmarks():
+def run_benchmarks(max_samples=20):
     # base_dir should be the root ct_data folder
     base_dir = Path("ct_data")
-    datasets = find_datasets(base_dir)
+    datasets = find_datasets(base_dir, max_samples)
     
-    if len(datasets) < 20:
+    if len(datasets) < max_samples:
         logger.warning(f"Only found {len(datasets)} datasets. Proceeding with available ones.")
 
 
@@ -48,7 +48,7 @@ def run_benchmarks():
     mask_dir.mkdir(parents=True, exist_ok=True)
 
     print("=" * 70)
-    print("ESTABLISHING VANILLA GROUND TRUTH (SAVING MASKS)")
+    print(f"ESTABLISHING VANILLA GROUND TRUTH (SAVING MASKS) | Max Samples: {max_samples}")
     print("=" * 70)
 
     for i, (category, img_path) in enumerate(datasets):
@@ -115,4 +115,10 @@ def run_benchmarks():
 
 
 if __name__ == "__main__":
-    run_benchmarks()
+    import argparse
+    
+    parser = argparse.ArgumentParser(description="Run vanilla TotalSegmentator benchmark")
+    parser.add_argument("--max-samples", type=int, default=20, help="Maximum number of samples to process")
+    args = parser.parse_args()
+    
+    run_benchmarks(max_samples=args.max_samples)

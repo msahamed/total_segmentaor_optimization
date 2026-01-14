@@ -605,6 +605,43 @@ Your benchmark is successful if:
 
 ---
 
+## 🆚 Comparing Performance: Vanilla vs Optimized
+
+If you want to benchmark the speedup and accuracy against the original TotalSegmentator implementation, follow this 3-step workflow:
+
+### Step 1: Run Vanilla Benchmark (Baseline)
+This script runs the original PyTorch implementation and saves "ground truth" masks. You can specify the number of samples to process.
+
+```bash
+python 03_vanilla_benchmark.py --max-samples 49
+# Outputs: benchmarks/vanilla_benchmark_results/masks/
+```
+
+### Step 2: Run Optimized Benchmark
+Run the optimized pipeline (if you haven't already).
+
+```bash
+python 06_inferenceAndPassport.py
+# Outputs: benchmarks/inference_and_passport_results/masks/
+```
+
+### Step 3: Run Comparison Script
+This script compares the two runs, calculates Dice scores, and generates a report.
+
+```bash
+python 07_compare_vanilla_vs_optimized.py
+```
+
+### Expected Output
+The script will generate a console table and save a detailed report to `benchmarks/VANILLA_VS_OPTIMIZED_REPORT.md`.
+
+| Metric | Expected Value |
+| :--- | :--- |
+| **Speedup** | **4.0x - 5.0x** (Optimized is faster) |
+| **Mean Dice** | **> 0.90** (High agreement) |
+
+---
+
 ## 📝 Example Validation Report
 
 After running your benchmark, create a validation report:
