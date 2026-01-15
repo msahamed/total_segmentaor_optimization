@@ -28,7 +28,7 @@ def calculate_dice(seg1, seg2, labels):
 
 def compare():
     # Define paths
-    vanilla_path = Path("benchmarks/vanilla_benchmark_results/vanilla_ground_truth.json")
+    vanilla_path = Path("benchmarks/vanilla_ground_truth.json")
     optimized_path = Path("benchmarks/inference_and_passport_results/benchmark_results.json")
     
     if not vanilla_path.exists():
@@ -62,8 +62,8 @@ def compare():
     report_lines.append(f"**Vanilla Source**: `{vanilla_path}`")
     report_lines.append(f"**Optimized Source**: `{optimized_path}`\n")
     
-    report_lines.append("| Subject | Shape | Vanilla Latency | Optimized Latency | Speedup | V-Organs | O-Organs | Org-Diff | Dice (Mean) | V-Throughput | O-Throughput |")
-    report_lines.append("| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |")
+    report_lines.append("| Subject | Shape | Vanilla Latency | Optimized Latency | Speedup | V-Organs | O-Organs | Org-Diff | Dice (Mean) | Org-Details |")
+    report_lines.append("| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |")
     
     speedups = [] # Fix: Re-initialize speedups list
     all_dice = [] # Fix: Re-initialize all_dice list
@@ -88,6 +88,19 @@ def compare():
             v_org = v.get("num_organs", 0)
             o_org = o.get("num_organs", 0)
             org_diff = o_org - v_org
+            
+            # Detailed Organ Match
+            v_organs_set = set(v.get("organs_present", []))
+            o_organs_set = set(o.get("organs_present", []))
+            
+            missing_in_optimized = v_organs_set - o_organs_set
+            extra_in_optimized = o_organs_set - v_organs_set
+            
+            org_details = ""
+            if missing_in_optimized:
+                org_details += f"Missing: {list(missing_in_optimized)} "
+            if extra_in_optimized:
+                org_details += f"Extra: {list(extra_in_optimized)}"
             
             # Throughput (MVox/s)
             shape = v.get("shape", [0,0,0])
@@ -126,7 +139,8 @@ def compare():
                 dice_str = "Error"
                 logger.error(f"Error calculating dice for {subj}: {e}")
                 
-            line = f"| {subj} | {shape} | {v_lat:.2f}s | {o_lat:.2f}s | {speedup:.2f}x | {v_org} | {o_org} | {org_diff:+} | {dice_str} | {v_tp:.2f} | {o_tp:.2f} |"
+                
+            line = f"| {subj} | {shape} | {v_lat:.2f}s | {o_lat:.2f}s | {speedup:.2f}x | {v_org} | {o_org} | {org_diff:+} | {dice_str} | {org_details} |"
             report_lines.append(line)
             
             comparisons.append({

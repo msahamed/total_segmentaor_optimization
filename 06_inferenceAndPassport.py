@@ -355,6 +355,7 @@ def run_inference_and_passport_benchmark(max_samples=20):
                     "passport_extraction": round(passport_time, 3)
                 },
                 "num_organs": len(passport),
+                "organs_present": list(passport.keys()),
                 "mask_path": str(mask_path),
                 "passport_path": str(passport_path),
                 "passport_size_kb": round(passport_path.stat().st_size / 1024, 2)
