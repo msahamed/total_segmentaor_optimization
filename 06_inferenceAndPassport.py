@@ -23,8 +23,8 @@ Outputs:
 - Detailed timing breakdown (preprocessing, inference, passport, postprocessing)
 - Benchmark results JSON
 
-Author: Optimized for production deployment
-Date: 2026-01-12 (Updated to use 3mm passport extraction)
+Optimized for production deployment
+Date: 2026-02-09 (Updated to use 3mm passport extraction)
 """
 
 import os
@@ -174,19 +174,22 @@ def extract_passport(mask_data, affine, decimation_target=500):
 
         # Decimate boundary points to reduce storage/computation
         if len(boundary_vox) > decimation_target:
-            idx = np.random.choice(len(boundary_vox), decimation_target, replace=False)
+            idx = np.random.choice(
+                len(boundary_vox), decimation_target, replace=False)
             boundary_vox = boundary_vox[idx]
 
         # Map boundary to world coordinates
         if len(boundary_vox) > 0:
             b_ones = np.ones((boundary_vox.shape[0], 1))
-            b_coords_world = (affine @ np.hstack([boundary_vox, b_ones]).T).T[:, :3]
+            b_coords_world = (
+                affine @ np.hstack([boundary_vox, b_ones]).T).T[:, :3]
             boundary_points = b_coords_world.tolist()
         else:
             boundary_points = []
 
         # Volume in mm³
-        volume_mm3 = float(np.sum(label_mask) * np.abs(np.linalg.det(affine[:3, :3])))
+        volume_mm3 = float(np.sum(label_mask) *
+                           np.abs(np.linalg.det(affine[:3, :3])))
 
         passport[int(label)] = {
             "centroid": centroid.tolist(),
@@ -235,7 +238,8 @@ def run_inference_and_passport_benchmark(max_samples=20):
     providers.append('CPUExecutionProvider')
 
     logger.info(f"ONNX Runtime providers: {providers}")
-    session = ort.InferenceSession(model_path, sess_options=so, providers=providers)
+    session = ort.InferenceSession(
+        model_path, sess_options=so, providers=providers)
     input_name = session.get_inputs()[0].name
 
     # ===== Find datasets =====
@@ -243,7 +247,8 @@ def run_inference_and_passport_benchmark(max_samples=20):
     datasets = find_datasets(base_dir, max_samples=max_samples)
 
     if len(datasets) == 0:
-        logger.error("No datasets found. Please run 01_download_data.py first.")
+        logger.error(
+            "No datasets found. Please run 01_download_data.py first.")
         return
 
     # ===== Setup output directories =====
@@ -274,14 +279,16 @@ def run_inference_and_passport_benchmark(max_samples=20):
             pre_start = time.time()
             img_canonical = nib.as_closest_canonical(original_img)
 
-            # Use order=1 (Linear) for 30-50% speedup with minimal accuracy loss
-            img_resampled = change_spacing(img_canonical, new_spacing=3.0, order=1)
+            # Use order=3 (Cubic) to match vanilla TotalSegmentator preprocessing
+            img_resampled = change_spacing(
+                img_canonical, new_spacing=3.0, order=3)
 
             data = img_resampled.get_fdata().astype(np.float32)
             data = np.clip(data, -1004.0, 1588.0)
             data = (data - (-50.3869)) / 503.3923
 
-            input_data = data.transpose(2, 1, 0)[np.newaxis, np.newaxis, :, :, :]
+            input_data = data.transpose(
+                2, 1, 0)[np.newaxis, np.newaxis, :, :, :]
             original_shape_resampled = input_data.shape[2:]
 
             # Pad to multiple of 32 (model requirement)
@@ -316,7 +323,8 @@ def run_inference_and_passport_benchmark(max_samples=20):
                                     :original_shape_resampled[2]]
 
             # Get segmentation at 3mm resolution (argmax)
-            seg_3mm = np.argmax(prediction[0], axis=0).astype(np.uint8)  # (Z, Y, X)
+            seg_3mm = np.argmax(prediction[0], axis=0).astype(
+                np.uint8)  # (Z, Y, X)
             seg_3mm = seg_3mm.transpose(2, 1, 0)  # (X, Y, Z) for nibabel
 
             # Extract passport from 3mm volume
@@ -385,11 +393,16 @@ def run_inference_and_passport_benchmark(max_samples=20):
     successful_results = [r for r in results if "error" not in r]
 
     if successful_results:
-        avg_total = np.mean([r["latency_total_sec"] for r in successful_results])
-        avg_pre = np.mean([r["breakdown"]["preprocessing"] for r in successful_results])
-        avg_inf = np.mean([r["breakdown"]["inference"] for r in successful_results])
-        avg_post = np.mean([r["breakdown"]["postprocessing"] for r in successful_results])
-        avg_passport = np.mean([r["breakdown"]["passport_extraction"] for r in successful_results])
+        avg_total = np.mean([r["latency_total_sec"]
+                            for r in successful_results])
+        avg_pre = np.mean([r["breakdown"]["preprocessing"]
+                          for r in successful_results])
+        avg_inf = np.mean([r["breakdown"]["inference"]
+                          for r in successful_results])
+        avg_post = np.mean([r["breakdown"]["postprocessing"]
+                           for r in successful_results])
+        avg_passport = np.mean(
+            [r["breakdown"]["passport_extraction"] for r in successful_results])
         avg_organs = np.mean([r["num_organs"] for r in successful_results])
 
         print("\n" + "=" * 80)
@@ -397,10 +410,14 @@ def run_inference_and_passport_benchmark(max_samples=20):
         print("=" * 80)
         print(f"Successful runs: {len(successful_results)}/{len(results)}")
         print(f"Average total latency: {avg_total:.3f}s")
-        print(f"  - Preprocessing:        {avg_pre:.3f}s ({avg_pre/avg_total*100:.1f}%)")
-        print(f"  - Inference:            {avg_inf:.3f}s ({avg_inf/avg_total*100:.1f}%)")
-        print(f"  - Postprocessing:       {avg_post:.3f}s ({avg_post/avg_total*100:.1f}%)")
-        print(f"  - Passport Extraction:  {avg_passport:.3f}s ({avg_passport/avg_total*100:.1f}%)")
+        print(
+            f"  - Preprocessing:        {avg_pre:.3f}s ({avg_pre/avg_total*100:.1f}%)")
+        print(
+            f"  - Inference:            {avg_inf:.3f}s ({avg_inf/avg_total*100:.1f}%)")
+        print(
+            f"  - Postprocessing:       {avg_post:.3f}s ({avg_post/avg_total*100:.1f}%)")
+        print(
+            f"  - Passport Extraction:  {avg_passport:.3f}s ({avg_passport/avg_total*100:.1f}%)")
         print(f"Average organs detected: {avg_organs:.1f}")
         print(f"\nPassport extraction overhead: {avg_passport:.3f}s "
               f"({avg_passport/avg_total*100:.1f}% of total pipeline)")
@@ -409,13 +426,15 @@ def run_inference_and_passport_benchmark(max_samples=20):
 
         # Additional insight
         if avg_passport > 0.5:
-            print(f"\n⚠️  INSIGHT: Passport extraction takes {avg_passport:.3f}s")
+            print(
+                f"\n⚠️  INSIGHT: Passport extraction takes {avg_passport:.3f}s")
             print("   Consider profiling to identify bottlenecks:")
             print("   - Binary erosion (likely culprit)")
             print("   - Coordinate transformations")
             print("   - Random sampling overhead")
         else:
-            print(f"\n✅ INSIGHT: Passport extraction is fast ({avg_passport:.3f}s)")
+            print(
+                f"\n✅ INSIGHT: Passport extraction is fast ({avg_passport:.3f}s)")
             print("   Extracting from 3mm resampled volume is optimal.")
             print("   No further optimization needed for this component.")
     else:

@@ -56,3 +56,4 @@ benchmarks/**/masks/
 *.swp
 *.swo
 .claude
+benchmarks/VANILLA_VS_OPTIMIZED_REPORT.md
