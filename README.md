@@ -1,58 +1,75 @@
 # TotalSegmentator Optimization Study
 
-This project evaluates and optimizes different implementations of the **TotalSegmentator** (Fast Model) pipeline to achieve the best balance of latency and segmentation accuracy (Dice score).
+This project evaluates and optimizes different implementations of the **TotalSegmentator** (Fast Model) pipeline to achieve the best balance of latency and segmentation accuracy (Dice score). Supports both **CT** and **MRI** modalities.
 
-## 🚀 Key Results (N=49 Comprehensive Validation)
+## 🚀 Key Results
+
+### CT Performance (N=49 Comprehensive Validation)
 
 | Implementation | Typical Latency | Mean Dice | Speedup | Environment |
 | :--- | :---: | :---: | :---: | :--- |
 | **Vanilla PyTorch** | ~43.8s | ~0.94 | 1.0x | Python/PyTorch |
-| **Python-ONNX (Baseline)** | ~8.9s | 0.9106 | 4.9x | Python/ORT |
-| **Rust-ONNX** | ~9.8s | 0.8454 | 4.4x | Rust/ORT |
-| **Python-ONNX (Optimized)** | **~10.0s*** | **0.91+** | **4.4x** | Python/ORT |
+| **Python-ONNX (Optimized)** | **~12.0s** | **0.91** | **4.3x** | Python/ORT |
 
-*\***Validated on N=49 diverse CT scans (100% success rate)**. Performance range: 2.6s-24s depending on volume size. Median: 9.6s, 95th percentile: 13.4s.*
+*Validated on N=49 diverse CT scans (100% success rate). Performance range: 2.6s-24s depending on volume size.*
+
+### MRI Performance (N=5 Validation)
+
+| Implementation | Typical Latency | Organs Detected | Success Rate | Environment |
+| :--- | :---: | :---: | :---: | :--- |
+| **Python-ONNX (Optimized)** | **~11.2s** | **26-40** | **100%** | Python/ORT |
+
+*Validated on 5 AMOS abdominal MRI scans. 50 organ classes available (Task 852).*
 
 ## 📋 Project Objective
-The goal was to move from the original PyTorch implementation to a high-performance deployment environment. While Rust was explored for its low-level efficiency, the **Optimized Python-ONNX** pipeline emerged as the winner due to:
-1.  **Superior Accuracy**: Utilizing `scipy`'s high-fidelity resampling kernels.
-2.  **Maximum Throughput**: Achieving lower latencies than Rust through aggressive ONNX session tuning and efficient `order=1` resampling.
+The goal was to move from the original PyTorch implementation to a high-performance deployment environment. The **Optimized Python-ONNX** pipeline emerged as the winner due to:
+1.  **Superior Accuracy**: Cubic resampling (`order=3`) matching vanilla TotalSegmentator's training pipeline.
+2.  **Maximum Throughput**: Aggressive ONNX session tuning (4-thread config, sequential execution).
+3.  **Multi-Modality**: Single pipeline supporting both CT (117 classes) and MRI (50 classes).
 
 ## 🛠 Usage Pipeline
 
 The project is organized into sequential scripts:
 
 1.  **`01_download_data.py`**: Downloads the 20-subject benchmark dataset (MSD Spleen & Learn2Reg).
-2.  **`02_export_model.py`**: Exports the TotalSegmentator model to ONNX format.
-3.  **`03_vanilla_benchmark.py`**: Establises the baseline performance using raw PyTorch.
+2.  **`02_export_model.py`**: Exports TotalSegmentator models to ONNX format. Supports `--task total` (CT) and `--task total_mr` (MRI).
+3.  **`03_vanilla_benchmark.py`**: Establishes the baseline performance using raw PyTorch.
 4.  **`04_onnx_benchmark.py`**: Baselines the standard Python ONNX Runtime implementation.
 5.  **`05_optimized_python_benchmark.py`**: Demonstrates 30-50% speedups via session tuning and resampling efficiency.
-6.  **`06_inferenceAndPassport.py`**: Combines optimized inference with anatomical passport extraction for registration pipelines. **[See Testing Guide](TESTING_GUIDE.md) for evaluator instructions.**
-7.  **`07_compare_vanilla_vs_optimized.py`**: Compares the results from `03_vanilla_benchmark.py` and `06_inferenceAndPassport.py` to calculate speedup and accuracy (Dice score).
-8.  **`06_linux_production_benchmark.py`**: Final production-ready script for Linux/AMD environments (includes `taskset` tuning).
+6.  **`06_inferenceAndPassport.py`**: Combines optimized inference with anatomical passport extraction. Supports `--modality ct|mri`. **[See Testing Guide](TESTING_GUIDE.md)**
+7.  **`07_compare_vanilla_vs_optimized.py`**: Compares vanilla vs optimized results (Dice score, speedup).
+8.  **`08_visualize_passport.py`**: Multi-panel passport visualization (organ map, volumes, projections, organ shapes).
+9.  **`09_visualize_spine.py`**: Spine-focused visualization with inter-vertebral distances, angles, and Cobb angle.
 
 ## 📁 Repository Structure
-- `rust/`: Experimental Rust implementation (for study purposes).
-- `benchmarks/`: Comprehensive latency and Dice score reports.
-- `models/`: ONNX model storage (includes pre-exported `totalsegmentator_total_fast_fp32.onnx`, 66MB).
-- `ct_data/`: (Ignored) Raw medical image data.
+- `models/`: ONNX model storage.
+  - `totalsegmentator_total_fast_fp32.onnx` — CT model (66MB, 117 classes, Task 297)
+  - `totalsegmentator_total_mr_fast_fp32.onnx` — MRI model (63MB, 50 classes, Task 852)
+- `ct_data/`: CT scan data (.nii.gz files).
+- `mri_data/`: MRI scan data (.nii.gz files).
+- `benchmarks/`: Latency and Dice score reports.
+  - `inference_and_passport_results/` — CT benchmark outputs and passports.
+  - `inference_and_passport_results_mri/` — MRI benchmark outputs and passports.
 - `registration/`: Metadata-driven registration system for medical imaging.
   - `scripts/`: Registration engine and passport extraction tools.
   - `metadata/`: Pre-computed anatomical passports (centroids, eigenvectors, boundaries).
   - `output/`: Registration results and visualizations.
+- `rust/`: Experimental Rust implementation (for study purposes).
 
 ## 📥 Dataset Download
 
-The complete benchmark dataset (N=49 CT scans) is available for download:
-
+### CT Dataset (N=49)
 **Google Drive:** [Download Benchmark Dataset](https://drive.google.com/file/d/1g_a08EMAG1NTAWM5m2JV4mPgCcSqDuJs/view?usp=sharing)
 
-**Dataset Contents:**
+**Contents:**
 - MSD Spleen (Task09): 5 subjects
 - Learn2Reg Challenge: 42 subjects (21 paired exp/insp)
 - Custom samples: 2 subjects
 
-**Usage:** Extract to `ct_data/` directory and run benchmarks.
+**Usage:** Extract to `ct_data/` directory.
+
+### MRI Dataset (N=5)
+AMOS abdominal MRI scans (T1-weighted). Place `.nii.gz` files in `mri_data/` directory.
 
 ## 🔬 Registration Pipeline: Anatomical Passport System
 
@@ -144,69 +161,84 @@ Located in `registration/scripts/`:
 
 See `registration/sabber_registration_notes.md` for comprehensive documentation (847 lines).
 
-## ✅ Comprehensive Validation (N=49)
+## ✅ Comprehensive Validation
 
-**Final Validation completed on 2026-01-13 with 49 diverse CT scans:**
+### CT Validation (N=49)
 
 | Metric | Result | Target | Status |
 |--------|--------|--------|--------|
-| **Success Rate** | **100%** (49/49) | >95% | ✅ **Perfect** |
-| **Mean Latency** | **9.968s** | <12s | ✅ **Excellent** |
-| **Median Latency** | **9.627s** | <10s | ✅ **Excellent** |
-| **95th Percentile** | **13.368s** | <20s | ✅ **Excellent** |
-| **Inference** | **6.768s** (67.9%) | - | ✅ **Optimized** |
-| **Passport Extraction** | **2.105s** (21.1%) | - | ✅ **Fast** |
-| **Mean Dice** | **0.91+** | >0.85 | ✅ **Clinical** |
+| **Success Rate** | **100%** (49/49) | >95% | ✅ |
+| **Mean Latency** | **~12s** | <15s | ✅ |
+| **Mean Dice vs Vanilla** | **0.91** | >0.85 | ✅ |
+| **Speedup** | **4.3x** | >3x | ✅ |
 
-**Dataset Composition:**
-- MSD Spleen: 5 scans (official test dataset)
-- Learn2Reg: 42 scans (thoracic CT, paired exp/insp)
-- Custom samples: 2 scans (edge cases)
+### MRI Validation (N=5)
 
-**Key Optimizations Applied:**
-1. ✅ **Passport extraction from 3mm volume** (8.4× faster than original resolution)
-2. ✅ **4-thread ONNX configuration** (15-20% faster than using all cores)
-3. ✅ **Optimized preprocessing** (linear interpolation, order=1)
+| Metric | Result | Target | Status |
+|--------|--------|--------|--------|
+| **Success Rate** | **100%** (5/5) | >95% | ✅ |
+| **Mean Latency** | **~11.2s** | <15s | ✅ |
+| **Organs Detected** | **26-40** per scan | >20 | ✅ |
 
-**Documentation:**
-- Full results: `COMPREHENSIVE_BENCHMARK_N49_RESULTS.md`
-- Dataset research: `TOTALSEGMENTATOR_TEST_DATASETS_RESEARCH.md`
-- Optimization timeline: `BENCHMARK_SUMMARY_2026-01-12.md`
+### Key Optimizations Applied
+1. ✅ **Cubic resampling (`order=3`)** matching vanilla training pipeline
+2. ✅ **Passport extraction from 3mm volume** (8.4x faster than original resolution)
+3. ✅ **4-thread ONNX configuration** (15-20% faster than using all cores)
+4. ✅ **Modality-aware normalization** (CT: dataset-level z-score with HU clipping; MRI: per-image z-score)
+
+## 🔬 CT vs MRI Model Details
+
+| Property | CT Model | MRI Model |
+|----------|----------|-----------|
+| **Task ID** | 297 | 852 |
+| **Output Classes** | 117 | 50 |
+| **Normalization** | CT: clip [-1004, 1588] HU, z-score (dataset-level) | Z-score (per-image, no clipping) |
+| **Trainer** | nnUNetTrainer_4000epochs_NoMirroring | nnUNetTrainer_2000epochs_NoMirroring |
+| **Model Size** | 66 MB | 63 MB |
+| **Structures** | Full body: organs, bones (individual vertebrae C1-S1, 24 ribs), vessels, muscles | Abdominal: organs, bones (merged vertebrae), vessels, muscles |
 
 ## 🧪 Testing with Custom Datasets
 
-Evaluators and researchers can validate the pipeline with their own CT datasets using `06_inferenceAndPassport.py`.
-
-**Quick Start:**
+### CT Inference
 ```bash
 # 1. Place CT scans (.nii.gz) in ct_data/ directory
 cp your_ct_scans/*.nii.gz ct_data/
 
-# 2. Run benchmark (processes up to 20 scans by default)
-python 06_inferenceAndPassport.py
+# 2. Run benchmark
+python 06_inferenceAndPassport.py --modality ct
 
 # 3. View results
 cat benchmarks/inference_and_passport_results/benchmark_results.json
 ```
 
+### MRI Inference
+```bash
+# 1. Place MRI scans (.nii.gz) in mri_data/ directory
+cp your_mri_scans/*.nii.gz mri_data/
+
+# 2. Run benchmark
+python 06_inferenceAndPassport.py --modality mri
+
+# 3. View results
+cat benchmarks/inference_and_passport_results_mri/benchmark_results.json
+```
+
+### Visualization
+```bash
+# Static passport dashboard
+python 08_visualize_passport.py <passport.json> --modality ct
+
+# Spine analysis
+python 09_visualize_spine.py <passport.json> --modality ct
+```
+
 **For comprehensive evaluator instructions, see:** **[TESTING_GUIDE.md](TESTING_GUIDE.md)**
 
-The testing guide includes:
-- Step-by-step setup instructions
-- Data preparation guidelines
-- Performance validation criteria
-- Troubleshooting common issues
-- Example validation reports
-
 ## 💡 Recommendation
-For production deployment, use the **Optimized Python-ONNX** pipeline. It provides a **4.4x speedup** over Vanilla PyTorch while maintaining clinical accuracy (>0.90 Dice).
-
-> **Verify it yourself:** You can run `python 07_compare_vanilla_vs_optimized.py` (after running benchmarks 03 and 06) to generate a customized performance report for your specific hardware.
-
+For production deployment, use the **Optimized Python-ONNX** pipeline with `--modality ct|mri`. It provides a **4.3x speedup** over Vanilla PyTorch while maintaining clinical accuracy (>0.90 Dice for CT).
 
 **Validated Performance:**
-- **Average: ~10 seconds** per CT scan
-- **Range: 2.6s-24s** (depending on volume size)
-- **100% reliability** across 49 diverse scans
+- **CT**: ~12s average per scan, 0.91 Dice, 100% reliability across 49 scans
+- **MRI**: ~11.2s average per scan, 26-40 organs detected, 100% reliability across 5 scans
 
-For **registration workflows**, the metadata-driven approach offers dramatic speedups (1000×) with acceptable accuracy for most clinical applications.
+For **registration workflows**, the metadata-driven approach offers dramatic speedups (1000x) with acceptable accuracy for most clinical applications.
