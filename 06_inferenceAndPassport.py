@@ -47,11 +47,40 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# ===== Modality-specific configurations =====
+MODALITY_CONFIG = {
+    "ct": {
+        "model_path": "models/totalsegmentator_total_fast_fp32.onnx",
+        "data_dir": "ct_data",
+        "output_suffix": "",
+    },
+    "mri": {
+        "model_path": "models/totalsegmentator_total_mr_fast_fp32.onnx",
+        "data_dir": "mri_data",
+        "output_suffix": "_mri",
+    },
+}
+
+
+def normalize_ct(data):
+    """CT: clip to HU percentiles, then dataset-level z-score."""
+    data = np.clip(data, -1004.0, 1588.0)
+    data = (data - (-50.3869)) / 503.3923
+    return data
+
+
+def normalize_mri(data):
+    """MRI: per-image z-score normalization (no clipping)."""
+    mean = data.mean()
+    std = data.std()
+    data = (data - mean) / max(std, 1e-8)
+    return data
+
 
 def find_datasets(base_dir, max_samples=20):
     """
-    Find CT scan datasets from multiple directories.
-    Priority: Root ct_data -> learn2reg/scans
+    Find scan datasets from multiple directories.
+    Priority: Root dir -> learn2reg/scans
     """
     datasets = []
 
@@ -70,7 +99,7 @@ def find_datasets(base_dir, max_samples=20):
                 if len(datasets) >= max_samples:
                     break
 
-    logger.info(f"Found {len(datasets)} CT scans for benchmarking")
+    logger.info(f"Found {len(datasets)} scans for benchmarking")
     return datasets
 
 
@@ -203,7 +232,7 @@ def extract_passport(mask_data, affine, decimation_target=500):
     return passport
 
 
-def run_inference_and_passport_benchmark(max_samples=20):
+def run_inference_and_passport_benchmark(max_samples=20, modality="ct"):
     """
     Run complete benchmark: Inference + Passport Extraction.
 
@@ -213,7 +242,8 @@ def run_inference_and_passport_benchmark(max_samples=20):
     3. Postprocessing (argmax, resample back to original resolution)
     4. Passport Extraction (centroids, eigenvectors, boundary points)
     """
-    model_path = "models/totalsegmentator_total_fast_fp32.onnx"
+    config = MODALITY_CONFIG[modality]
+    model_path = config["model_path"]
     if not os.path.exists(model_path):
         logger.error(f"Model not found: {model_path}")
         return
@@ -243,25 +273,27 @@ def run_inference_and_passport_benchmark(max_samples=20):
     input_name = session.get_inputs()[0].name
 
     # ===== Find datasets =====
-    base_dir = Path("ct_data")
+    base_dir = Path(config["data_dir"])
     datasets = find_datasets(base_dir, max_samples=max_samples)
 
     if len(datasets) == 0:
         logger.error(
-            "No datasets found. Please run 01_download_data.py first.")
+            f"No datasets found in {base_dir}/. "
+            f"Place .nii.gz files there first.")
         return
 
     # ===== Setup output directories =====
     results = []
-    output_dir = Path("benchmarks/inference_and_passport_results")
+    output_dir = Path(f"benchmarks/inference_and_passport_results{config['output_suffix']}")
     mask_dir = output_dir / "masks"
     passport_dir = output_dir / "passports"
     mask_dir.mkdir(parents=True, exist_ok=True)
     passport_dir.mkdir(parents=True, exist_ok=True)
 
     print("=" * 80)
-    print("INFERENCE + PASSPORT EXTRACTION BENCHMARK")
+    print(f"INFERENCE + PASSPORT EXTRACTION BENCHMARK ({modality.upper()})")
     print("=" * 80)
+    print(f"Modality: {modality.upper()}")
     print(f"Samples: {len(datasets)}")
     print(f"Model: {model_path}")
     print(f"Output: {output_dir}")
@@ -284,8 +316,10 @@ def run_inference_and_passport_benchmark(max_samples=20):
                 img_canonical, new_spacing=3.0, order=3)
 
             data = img_resampled.get_fdata().astype(np.float32)
-            data = np.clip(data, -1004.0, 1588.0)
-            data = (data - (-50.3869)) / 503.3923
+            if modality == "mri":
+                data = normalize_mri(data)
+            else:
+                data = normalize_ct(data)
 
             input_data = data.transpose(
                 2, 1, 0)[np.newaxis, np.newaxis, :, :, :]
@@ -451,9 +485,19 @@ if __name__ == "__main__":
         "--max-samples",
         type=int,
         default=20,
-        help="Maximum number of CT scans to process (default: 20)"
+        help="Maximum number of scans to process (default: 20)"
+    )
+    parser.add_argument(
+        "--modality",
+        type=str,
+        choices=["ct", "mri"],
+        default="ct",
+        help="Imaging modality: 'ct' or 'mri' (default: ct)"
     )
 
     args = parser.parse_args()
 
-    run_inference_and_passport_benchmark(max_samples=args.max_samples)
+    run_inference_and_passport_benchmark(
+        max_samples=args.max_samples,
+        modality=args.modality
+    )

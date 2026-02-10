@@ -31,6 +31,11 @@ def get_model_info(task: str, fast: bool):
         else:
             # Standard 'total' task uses 5 models
             return [291, 292, 293, 294, 295], "nnUNetTrainerNoMirroring", "nnUNetPlans", "3d_fullres"
+    elif task == "total_mr":
+        if fast:
+            return [852], "nnUNetTrainer_2000epochs_NoMirroring", "nnUNetPlans", "3d_fullres"
+        else:
+            return [850, 851], "nnUNetTrainer_2000epochs_NoMirroring", "nnUNetPlans", "3d_fullres"
     elif task == "lung_vessels":
         return [258], "nnUNetTrainer", "nnUNetPlans", "3d_fullres"
     elif task == "body":
