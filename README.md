@@ -33,11 +33,11 @@ The project is organized into sequential scripts:
 
 1.  **`01_download_data.py`**: Downloads the 20-subject benchmark dataset (MSD Spleen & Learn2Reg).
 2.  **`02_export_model.py`**: Exports TotalSegmentator models to ONNX format. Supports `--task total` (CT) and `--task total_mr` (MRI).
-3.  **`03_vanilla_benchmark.py`**: Establishes the baseline performance using raw PyTorch.
+3.  **`03_vanilla_benchmark.py`**: Establishes the baseline performance using raw PyTorch. Supports `--modality ct|mri`.
 4.  **`04_onnx_benchmark.py`**: Baselines the standard Python ONNX Runtime implementation.
 5.  **`05_optimized_python_benchmark.py`**: Demonstrates 30-50% speedups via session tuning and resampling efficiency.
 6.  **`06_inferenceAndPassport.py`**: Combines optimized inference with anatomical passport extraction. Supports `--modality ct|mri`. **[See Testing Guide](TESTING_GUIDE.md)**
-7.  **`07_compare_vanilla_vs_optimized.py`**: Compares vanilla vs optimized results (Dice score, speedup).
+7.  **`07_compare_vanilla_vs_optimized.py`**: Compares vanilla vs optimized results (Dice score, speedup). Supports `--modality ct|mri`.
 8.  **`08_visualize_passport.py`**: Multi-panel passport visualization (organ map, volumes, projections, organ shapes).
 9.  **`09_visualize_spine.py`**: Spine-focused visualization with inter-vertebral distances, angles, and Cobb angle.
 
