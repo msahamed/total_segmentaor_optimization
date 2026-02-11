@@ -26,11 +26,24 @@ def calculate_dice(seg1, seg2, labels):
             dice_scores[label] = 2.0 * intersection / sum_masks
     return dice_scores
 
-def compare():
-    # Define paths
-    vanilla_path = Path("benchmarks/vanilla_ground_truth.json")
-    optimized_path = Path("benchmarks/inference_and_passport_results/benchmark_results.json")
-    
+MODALITY_CONFIG = {
+    "ct": {
+        "vanilla_json": "benchmarks/vanilla_ground_truth.json",
+        "optimized_json": "benchmarks/inference_and_passport_results/benchmark_results.json",
+        "report_path": "benchmarks/VANILLA_VS_OPTIMIZED_REPORT.md",
+    },
+    "mri": {
+        "vanilla_json": "benchmarks/vanilla_ground_truth_mri.json",
+        "optimized_json": "benchmarks/inference_and_passport_results_mri/benchmark_results.json",
+        "report_path": "benchmarks/VANILLA_VS_OPTIMIZED_REPORT_MRI.md",
+    },
+}
+
+def compare(modality="ct"):
+    config = MODALITY_CONFIG[modality]
+    vanilla_path = Path(config["vanilla_json"])
+    optimized_path = Path(config["optimized_json"])
+
     if not vanilla_path.exists():
         print(f"Error: Vanilla results not found at {vanilla_path}")
         return
@@ -57,8 +70,9 @@ def compare():
 
     # Prepare report content
     report_lines = []
-    report_lines.append("# Detailed Vanilla vs Optimized Comparison Report")
+    report_lines.append(f"# Vanilla vs Optimized Comparison Report ({modality.upper()})")
     report_lines.append(f"\n**Date**: {time.strftime('%Y-%m-%d %H:%M:%S')}")
+    report_lines.append(f"**Modality**: {modality.upper()}")
     report_lines.append(f"**Vanilla Source**: `{vanilla_path}`")
     report_lines.append(f"**Optimized Source**: `{optimized_path}`\n")
     
@@ -181,11 +195,15 @@ def compare():
     report_content = "\n".join(report_lines)
     print(report_content)
     
-    output_file = Path("benchmarks/VANILLA_VS_OPTIMIZED_REPORT.md")
+    output_file = Path(config["report_path"])
     with open(output_file, "w") as f:
         f.write(report_content)
     print(f"\n✅ Report saved to: {output_file}")
 
 if __name__ == "__main__":
     import time
-    compare()
+    import argparse
+    parser = argparse.ArgumentParser(description="Compare vanilla vs optimized TotalSegmentator")
+    parser.add_argument("--modality", choices=["ct", "mri"], default="ct", help="Imaging modality (default: ct)")
+    args = parser.parse_args()
+    compare(modality=args.modality)

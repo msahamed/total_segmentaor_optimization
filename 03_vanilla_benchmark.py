@@ -12,16 +12,31 @@ from totalsegmentator.python_api import totalsegmentator
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+MODALITY_CONFIG = {
+    "ct": {
+        "data_dir": "ct_data",
+        "task": "total",
+        "output_json": "benchmarks/vanilla_ground_truth.json",
+        "output_dir": "benchmarks/vanilla_benchmark_results",
+    },
+    "mri": {
+        "data_dir": "mri_data",
+        "task": "total_mr",
+        "output_json": "benchmarks/vanilla_ground_truth_mri.json",
+        "output_dir": "benchmarks/vanilla_benchmark_results_mri",
+    },
+}
+
 def find_datasets(base_dir, max_samples=20):
     datasets = []
-    
-    # 1. Root ct_data
+
+    # 1. Root data dir
     for f in base_dir.glob("*.nii.gz"):
         datasets.append(("Root", f))
         if len(datasets) >= max_samples:
             break
-            
-    # 2. learn2reg/scans (if more needed)
+
+    # 2. learn2reg/scans (if more needed, CT only)
     if len(datasets) < max_samples:
         l2r_dir = base_dir / "learn2reg" / "scans"
         if l2r_dir.exists():
@@ -29,12 +44,12 @@ def find_datasets(base_dir, max_samples=20):
                 datasets.append(("Learn2Reg", f))
                 if len(datasets) >= max_samples:
                     break
-            
+
     return datasets
 
-def run_benchmarks(max_samples=20):
-    # base_dir should be the root ct_data folder
-    base_dir = Path("ct_data")
+def run_benchmarks(max_samples=20, modality="ct"):
+    config = MODALITY_CONFIG[modality]
+    base_dir = Path(config["data_dir"])
     datasets = find_datasets(base_dir, max_samples)
     
     if len(datasets) < max_samples:
@@ -43,12 +58,12 @@ def run_benchmarks(max_samples=20):
 
 
     results = []
-    output_dir = Path("benchmarks/vanilla_benchmark_results")
+    output_dir = Path(config["output_dir"])
     mask_dir = output_dir / "masks"
     mask_dir.mkdir(parents=True, exist_ok=True)
 
     print("=" * 70)
-    print(f"ESTABLISHING VANILLA GROUND TRUTH (SAVING MASKS) | Max Samples: {max_samples}")
+    print(f"VANILLA GROUND TRUTH ({modality.upper()}) | Task: {config['task']} | Max Samples: {max_samples}")
     print("=" * 70)
 
     for i, (category, img_path) in enumerate(datasets):
@@ -69,7 +84,8 @@ def run_benchmarks(max_samples=20):
             # Run vanilla totalsegmentator (fast=True for 3mm)
             # Save the mask to the masks directory
             mask_path = mask_dir / f"{img_path.stem}_mask.nii.gz"
-            seg_img = totalsegmentator(img_path, None, fast=True, ml=True, quiet=True)
+            seg_img = totalsegmentator(img_path, None, fast=True, ml=True, quiet=True,
+                                       task=config["task"])
             nib.save(seg_img, str(mask_path))
             
             end_time = time.time()
@@ -103,13 +119,14 @@ def run_benchmarks(max_samples=20):
         except Exception as e:
             logger.error(f"Error processing {img_path}: {e}")
 
-    # Save final results in benchmarks folder
-    with open("benchmarks/vanilla_ground_truth.json", "w") as f:
+    # Save results
+    output_json = config["output_json"]
+    with open(output_json, "w") as f:
         json.dump(results, f, indent=4)
-    
+
     print("\n" + "=" * 70)
-    print(f"BENCHMARK COMPLETE. Results: 'benchmarks/vanilla_ground_truth.json'")
-    print(f"Masks stored in: 'benchmarks/vanilla_benchmark_results/masks/'")
+    print(f"BENCHMARK COMPLETE. Results: '{output_json}'")
+    print(f"Masks stored in: '{mask_dir}/'")
     print("=" * 70)
 
 
@@ -119,6 +136,7 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description="Run vanilla TotalSegmentator benchmark")
     parser.add_argument("--max-samples", type=int, default=20, help="Maximum number of samples to process")
+    parser.add_argument("--modality", choices=["ct", "mri"], default="ct", help="Imaging modality (default: ct)")
     args = parser.parse_args()
-    
-    run_benchmarks(max_samples=args.max_samples)
+
+    run_benchmarks(max_samples=args.max_samples, modality=args.modality)
