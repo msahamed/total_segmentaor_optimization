@@ -2,6 +2,7 @@
 
 **Script:** `06_inferenceAndPassport.py`
 **Purpose:** Benchmark TotalSegmentator inference with anatomical passport extraction
+**Modalities:** CT (117 classes) and MRI (50 classes)
 **Target Users:** Evaluators, QA testers, researchers validating performance
 
 ---
@@ -23,8 +24,9 @@
 
 For evaluators who want to run immediately:
 
+**CT:**
 ```bash
-# 1. Clone the repository (model is already included!)
+# 1. Clone the repository (models are already included!)
 git clone <repository-url>
 cd total_segmentator
 
@@ -35,13 +37,25 @@ pip install numpy scipy nibabel onnxruntime totalsegmentator
 cp your_ct_scan.nii.gz ct_data/
 
 # 4. Run the benchmark (default: 20 scans)
-python 06_inferenceAndPassport.py
+python 06_inferenceAndPassport.py --modality ct
 
 # 5. Check results
 cat benchmarks/inference_and_passport_results/benchmark_results.json
 ```
 
-**Note:** The ONNX model (`totalsegmentator_total_fast_fp32.onnx`, 66MB) is already included in the repository!
+**MRI:**
+```bash
+# 1. Place your MRI scans in mri_data/ directory
+cp your_mri_scan.nii.gz mri_data/
+
+# 2. Run the benchmark
+python 06_inferenceAndPassport.py --modality mri
+
+# 3. Check results
+cat benchmarks/inference_and_passport_results_mri/benchmark_results.json
+```
+
+**Note:** Both ONNX models are included in the repository — CT (66MB) and MRI (63MB).
 
 ---
 
@@ -60,14 +74,12 @@ cat benchmarks/inference_and_passport_results/benchmark_results.json
 
 ### Expected Performance
 
-Based on N=49 comprehensive validation:
-
-| Metric | Value |
-|--------|-------|
-| **Average Latency** | ~10 seconds per scan |
-| **Range** | 2.6s - 24s (depends on volume size) |
-| **Success Rate** | 100% (validated on diverse datasets) |
-| **Organs Detected** | 50-90 anatomical structures |
+| Metric | CT (N=49) | MRI (N=5) |
+|--------|-----------|-----------|
+| **Average Latency** | ~12s per scan | ~11.2s per scan |
+| **Range** | 2.6s - 24s | 8s - 15s |
+| **Success Rate** | 100% | 100% |
+| **Organs Detected** | 50-90 (117 classes) | 26-40 (50 classes) |
 
 ---
 
@@ -90,21 +102,19 @@ pip install totalsegmentator
 - `onnxruntime`: ONNX model inference
 - `totalsegmentator`: Official library (for resampling functions)
 
-### Step 2: ONNX Model (Included)
+### Step 2: ONNX Models (Included)
 
-✅ **The ONNX model is already included in this repository!**
+✅ **Both ONNX models are already included in this repository!**
 
-The pre-exported model is located at: `models/totalsegmentator_total_fast_fp32.onnx`
+| Model | Path | Classes | Size |
+|-------|------|---------|------|
+| **CT** | `models/totalsegmentator_total_fast_fp32.onnx` | 117 | 66MB |
+| **MRI** | `models/totalsegmentator_total_mr_fast_fp32.onnx` | 50 | 63MB |
 
-**Model Specifications:**
-- Format: ONNX FP32
-- Input: 3mm isotropic CT volumes
-- Output: 118 anatomical labels
-- Size: 66MB
-
-**Note:** If you need to re-export the model for any reason, you can run:
+**Note:** If you need to re-export the models:
 ```bash
-python 02_export_model.py
+python 02_export_model.py --task total --fast      # CT model
+python 02_export_model.py --task total_mr --fast    # MRI model
 ```
 
 ---
@@ -113,7 +123,7 @@ python 02_export_model.py
 
 ### Supported Data Format
 
-The script accepts **NIfTI format** (`.nii.gz` or `.nii`) CT scans.
+The script accepts **NIfTI format** (`.nii.gz` or `.nii`) for both CT and MRI scans.
 
 ### Download Benchmark Dataset (Optional)
 
@@ -137,51 +147,40 @@ unzip benchmark_dataset.zip -d ct_data/
 
 ### Directory Structure
 
-The script searches for CT scans in this order:
-
 ```
 total_segmentator/
-├── ct_data/                          # Priority 1: Root CT data
-│   ├── your_scan_001.nii.gz         # Place your test scans here
-│   ├── your_scan_002.nii.gz
-│   └── ...
+├── ct_data/                          # CT scans
+│   ├── your_scan_001.nii.gz
+│   └── learn2reg/scans/             # Learn2Reg dataset (optional)
+│       ├── case_001_exp.nii.gz
+│       └── ...
 │
-└── ct_data/learn2reg/scans/          # Priority 2: Learn2Reg dataset
-    ├── case_001_exp.nii.gz
-    ├── case_001_insp.nii.gz
+└── mri_data/                         # MRI scans
+    ├── your_mri_001.nii.gz
     └── ...
 ```
 
 ### Adding Your Custom Dataset
 
-**Option 1: Root Directory (Recommended)**
-
 ```bash
-# Place your scans directly in ct_data/
-cp /path/to/your/scans/*.nii.gz ct_data/
-```
+# CT scans
+cp /path/to/your/ct_scans/*.nii.gz ct_data/
 
-**Option 2: Learn2Reg Subdirectory**
-
-```bash
-# Create learn2reg directory (if needed)
-mkdir -p ct_data/learn2reg/scans
-
-# Copy your scans
-cp /path/to/your/scans/*.nii.gz ct_data/learn2reg/scans/
+# MRI scans
+cp /path/to/your/mri_scans/*.nii.gz mri_data/
 ```
 
 ### Data Requirements
 
 ✅ **Accepted:**
 - NIfTI format (`.nii.gz` or `.nii`)
-- CT scans (any body region)
+- CT scans (any body region) — use `--modality ct`
+- MRI scans (abdominal) — use `--modality mri`
 - Any resolution/spacing (will be resampled to 3mm)
 - Any orientation (will be canonicalized)
 
 ❌ **Not Supported:**
 - DICOM format (convert to NIfTI first)
-- Non-CT modalities (MRI, PET, etc.)
 - Corrupted or incomplete scans
 
 ### Data Conversion (if needed)
@@ -204,37 +203,38 @@ python -c "import dicom2nifti; dicom2nifti.convert_directory('/path/to/dicom', '
 ### Basic Usage
 
 ```bash
-# Run with default settings (20 scans)
-python 06_inferenceAndPassport.py
+# CT (default)
+python 06_inferenceAndPassport.py --modality ct
+
+# MRI
+python 06_inferenceAndPassport.py --modality mri
 ```
 
 ### Advanced Options
 
 ```bash
-# Process all available scans
-python 06_inferenceAndPassport.py --max-samples 1000
-
 # Process only 5 scans (quick test)
-python 06_inferenceAndPassport.py --max-samples 5
+python 06_inferenceAndPassport.py --modality ct --max-samples 5
 
-# Process exactly 49 scans (validated benchmark size)
-python 06_inferenceAndPassport.py --max-samples 49
+# Process all available scans
+python 06_inferenceAndPassport.py --modality ct --max-samples 1000
 ```
 
 ### Command-Line Arguments
 
 | Argument | Type | Default | Description |
 |----------|------|---------|-------------|
-| `--max-samples` | int | 20 | Maximum number of CT scans to process |
+| `--modality` | str | ct | Imaging modality: `ct` or `mri` |
+| `--max-samples` | int | 20 | Maximum number of scans to process |
 
 ### What Happens During Execution
 
 The script will:
 
-1. **Find CT scans** in `ct_data/` directory
+1. **Find scans** in `ct_data/` (CT) or `mri_data/` (MRI)
 2. **For each scan:**
-   - Preprocess (resample to 3mm, normalize, pad)
-   - Run ONNX inference (segment 118 anatomical structures)
+   - Preprocess (resample to 3mm, modality-specific normalization, pad)
+   - Run ONNX inference (CT: 117 classes, MRI: 50 classes)
    - Postprocess (resample back to original resolution)
    - Extract anatomical passport (centroids, eigenvectors, boundaries)
    - Save outputs (mask + passport JSON)
@@ -289,19 +289,26 @@ Results saved to: benchmarks/inference_and_passport_results/benchmark_results.js
 After running the benchmark, you'll find:
 
 ```
+# CT outputs
 benchmarks/inference_and_passport_results/
-├── benchmark_results.json          # Detailed per-scan results
-├── masks/                          # Segmentation masks (original resolution)
-│   ├── your_scan_001_mask.nii.gz
-│   └── your_scan_002_mask.nii.gz
-└── passports/                      # Anatomical passports (JSON)
-    ├── your_scan_001_passport.json
-    └── your_scan_002_passport.json
+├── benchmark_results.json
+├── masks/
+│   └── your_scan_001_mask.nii.gz
+└── passports/
+    └── your_scan_001_passport.json
+
+# MRI outputs
+benchmarks/inference_and_passport_results_mri/
+├── benchmark_results.json
+├── masks/
+│   └── your_mri_001_mask.nii.gz
+└── passports/
+    └── your_mri_001_passport.json
 ```
 
 ### Benchmark Results JSON
 
-**Location:** `benchmarks/inference_and_passport_results/benchmark_results.json`
+**Location:** `benchmarks/inference_and_passport_results/benchmark_results.json` (CT) or `benchmarks/inference_and_passport_results_mri/benchmark_results.json` (MRI)
 
 **Structure:**
 
@@ -368,26 +375,35 @@ benchmarks/inference_and_passport_results/
 
 ## ✅ Validation Guidelines
 
-### Performance Targets (Based on N=49 Validation)
+### Performance Targets
 
-Use these targets to validate your results:
+**CT (Based on N=49 Validation):**
 
-| Target | Threshold | Status |
-|--------|-----------|--------|
-| **Mean Latency** | < 12s | ✅ Expected: ~10s |
-| **95th Percentile** | < 20s | ✅ Expected: ~13.4s |
-| **Success Rate** | > 95% | ✅ Expected: 100% |
-| **Organs Detected** | 50-90 | ✅ Expected: ~69 avg |
+| Target | Threshold | Expected |
+|--------|-----------|----------|
+| **Mean Latency** | < 15s | ~12s |
+| **Success Rate** | > 95% | 100% |
+| **Organs Detected** | 50-90 | ~69 avg |
+| **Dice vs Vanilla** | > 0.85 | 0.91 |
+
+**MRI (Based on N=5 Validation):**
+
+| Target | Threshold | Expected |
+|--------|-----------|----------|
+| **Mean Latency** | < 15s | ~11.2s |
+| **Success Rate** | > 95% | 100% |
+| **Organs Detected** | 20-40 | 26-40 |
 
 ### Expected Performance by Scan Type
 
-| CT Type | Typical Latency | Organ Count |
-|---------|----------------|-------------|
-| **Small volumes** (limited FOV) | 2-5s | 10-20 |
-| **Thoracic CT (expiration)** | 7-10s | 50-60 |
-| **Thoracic CT (inspiration)** | 8-11s | 80-90 |
-| **Abdominal CT** | 9-15s | 60-75 |
-| **Large whole-body scans** | 15-24s | 70-85 |
+| Scan Type | Typical Latency | Organ Count |
+|-----------|----------------|-------------|
+| **CT - Small volumes** (limited FOV) | 2-5s | 10-20 |
+| **CT - Thoracic (expiration)** | 7-10s | 50-60 |
+| **CT - Thoracic (inspiration)** | 8-11s | 80-90 |
+| **CT - Abdominal** | 9-15s | 60-75 |
+| **CT - Large whole-body** | 15-24s | 70-85 |
+| **MRI - Abdominal** | 8-15s | 26-40 |
 
 ### Quality Checks
 
@@ -514,16 +530,18 @@ python 06_inferenceAndPassport.py --max-samples 5
 #### Issue 5: "Segmentation looks incorrect"
 
 **Checklist:**
-1. **Verify input:** Is it a CT scan (not MRI/PET)?
+1. **Verify modality:** Make sure you're using the correct `--modality` flag (ct or mri)
 2. **Check orientation:** TotalSegmentator expects RAS orientation (handled automatically)
-3. **Inspect HU values:** CT should have Hounsfield units (-1024 to +3071)
+3. **Inspect values:** CT should have Hounsfield units (-1024 to +3071). MRI values vary by sequence.
 
 **Validation:**
 ```python
 import nibabel as nib
 img = nib.load("ct_data/your_scan.nii.gz")
 data = img.get_fdata()
-print(f"Min: {data.min()}, Max: {data.max()}")  # Should be around [-1024, +3071]
+print(f"Min: {data.min()}, Max: {data.max()}")
+# CT: should be around [-1024, +3071]
+# MRI: varies by acquisition (no fixed range)
 ```
 
 ---
@@ -570,26 +588,23 @@ If you encounter issues not covered here:
 ### Related Documentation
 
 - **`README.md`** - Project overview and key results
-- **`COMPREHENSIVE_BENCHMARK_N49_RESULTS.md`** - Full validation report (N=49 scans)
+- **`COMPREHENSIVE_BENCHMARK_N49_RESULTS.md`** - Full CT validation report (N=49 scans)
 - **`TOTALSEGMENTATOR_TEST_DATASETS_RESEARCH.md`** - Official test datasets
-- **`registration/sabber_registration_notes.md`** - Registration pipeline details (847 lines)
 
 ### Other Benchmark Scripts
 
-| Script | Purpose | Use Case |
+| Script | Purpose | Modality |
 |--------|---------|----------|
-| `03_vanilla_benchmark.py` | Baseline PyTorch performance | Compare against vanilla |
-| `04_onnx_benchmark.py` | Standard ONNX (unoptimized) | Mid-point comparison |
-| `05_optimized_python_benchmark.py` | Inference only (no passport) | Isolate inference performance |
-| `06_inferenceAndPassport.py` | **Complete pipeline** | **Production validation** ✅ |
+| `03_vanilla_benchmark.py` | Baseline PyTorch performance | CT, MRI (`--modality`) |
+| `06_inferenceAndPassport.py` | **Optimized pipeline** | CT, MRI (`--modality`) |
+| `07_compare_vanilla_vs_optimized.py` | Dice score + speedup comparison | CT, MRI (`--modality`) |
 
 ### Performance Comparison
 
-| Implementation | Latency | Speedup |
-|----------------|---------|---------|
-| Vanilla PyTorch | ~43.8s | 1.0× |
-| Standard ONNX | ~8.9s | 4.9× |
-| **Optimized ONNX + Passport** | **~10.0s** | **4.4×** |
+| Implementation | CT Latency | MRI Latency | CT Speedup |
+|----------------|-----------|-------------|------------|
+| Vanilla PyTorch | ~43.8s | TBD | 1.0x |
+| **Optimized ONNX** | **~12s** | **~11.2s** | **4.3x** |
 
 ---
 
@@ -598,47 +613,52 @@ If you encounter issues not covered here:
 Your benchmark is successful if:
 
 - ✅ **100% success rate** (no failed scans)
-- ✅ **Mean latency < 12s** (target: ~10s)
+- ✅ **Mean latency < 15s**
 - ✅ **Inference dominates** (65-70% of total time)
 - ✅ **Passport extraction < 25%** of total time
-- ✅ **Organs detected: 50-90** (depending on anatomy)
+- ✅ **CT organs detected: 50-90** (depending on anatomy)
+- ✅ **MRI organs detected: 20-40** (abdominal structures)
 
 ---
 
 ## 🆚 Comparing Performance: Vanilla vs Optimized
 
-If you want to benchmark the speedup and accuracy against the original TotalSegmentator implementation, follow this 3-step workflow:
+If you want to benchmark the speedup and accuracy against the original TotalSegmentator implementation, follow this 3-step workflow. All scripts support `--modality ct|mri`.
 
-### Step 1: Run Vanilla Benchmark (Baseline)
-This script runs the original PyTorch implementation and saves "ground truth" masks. You can specify the number of samples to process.
+### CT Comparison
 
 ```bash
-python 03_vanilla_benchmark.py --max-samples 49
-# Outputs: benchmarks/vanilla_benchmark_results/masks/
+# Step 1: Run vanilla baseline (saves masks + ground truth JSON)
+python 03_vanilla_benchmark.py --modality ct --max-samples 20
+
+# Step 2: Run optimized pipeline
+python 06_inferenceAndPassport.py --modality ct --max-samples 20
+
+# Step 3: Compare (generates Dice scores, speedup report)
+python 07_compare_vanilla_vs_optimized.py --modality ct
+# Report: benchmarks/VANILLA_VS_OPTIMIZED_REPORT.md
 ```
 
-### Step 2: Run Optimized Benchmark
-Run the optimized pipeline (if you haven't already).
+### MRI Comparison
 
 ```bash
-python 06_inferenceAndPassport.py
-# Outputs: benchmarks/inference_and_passport_results/masks/
-```
+# Step 1: Run vanilla baseline
+python 03_vanilla_benchmark.py --modality mri --max-samples 5
 
-### Step 3: Run Comparison Script
-This script compares the two runs, calculates Dice scores, and generates a report.
+# Step 2: Run optimized pipeline
+python 06_inferenceAndPassport.py --modality mri --max-samples 5
 
-```bash
-python 07_compare_vanilla_vs_optimized.py
+# Step 3: Compare
+python 07_compare_vanilla_vs_optimized.py --modality mri
+# Report: benchmarks/VANILLA_VS_OPTIMIZED_REPORT_MRI.md
 ```
 
 ### Expected Output
-The script will generate a console table and save a detailed report to `benchmarks/VANILLA_VS_OPTIMIZED_REPORT.md`.
 
-| Metric | Expected Value |
-| :--- | :--- |
-| **Speedup** | **4.0x - 5.0x** (Optimized is faster) |
-| **Mean Dice** | **> 0.90** (High agreement) |
+| Metric | CT Expected | MRI Expected |
+| :--- | :--- | :--- |
+| **Speedup** | **4.0x - 5.0x** | TBD |
+| **Mean Dice** | **> 0.90** | TBD |
 
 ---
 
@@ -703,6 +723,6 @@ print(f"Dice Score: {dice:.4f}")  # Target: >0.85, Expected: ~0.91
 
 ---
 
-**Document Version:** 1.0
-**Last Updated:** 2026-01-13
-**Validated On:** N=49 comprehensive dataset (100% success rate)
+**Document Version:** 2.0
+**Last Updated:** 2026-02-10
+**Validated On:** CT: N=49 (100% success), MRI: N=5 (100% success)

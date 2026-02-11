@@ -50,10 +50,6 @@ The project is organized into sequential scripts:
 - `benchmarks/`: Latency and Dice score reports.
   - `inference_and_passport_results/` — CT benchmark outputs and passports.
   - `inference_and_passport_results_mri/` — MRI benchmark outputs and passports.
-- `registration/`: Metadata-driven registration system for medical imaging.
-  - `scripts/`: Registration engine and passport extraction tools.
-  - `metadata/`: Pre-computed anatomical passports (centroids, eigenvectors, boundaries).
-  - `output/`: Registration results and visualizations.
 - `rust/`: Experimental Rust implementation (for study purposes).
 
 ## 📥 Dataset Download
@@ -70,96 +66,6 @@ The project is organized into sequential scripts:
 
 ### MRI Dataset (N=5)
 AMOS abdominal MRI scans (T1-weighted). Place `.nii.gz` files in `mri_data/` directory.
-
-## 🔬 Registration Pipeline: Anatomical Passport System
-
-The project includes a **metadata-driven registration system** that achieves **1000x speedup** over traditional intensity-based methods while maintaining clinical accuracy (~1.7mm error).
-
-### What is an Anatomical Passport?
-
-An anatomical passport is a compact JSON representation of organ geometry extracted from segmentation masks:
-
-```json
-{
-  "1": {  // Organ label (e.g., 1 = spleen)
-    "centroid": [x, y, z],              // 3D organ center in world coordinates
-    "covariance": [[3x3 matrix]],       // Spatial distribution
-    "eigenvalues": [λ1, λ2, λ3],        // Principal component magnitudes
-    "eigenvectors": [[3x3 matrix]],     // Principal axes (orientation)
-    "boundary_points": [[x,y,z], ...],  // ~500 surface points per organ
-    "volume_mm3": 12345.67              // Organ volume
-  }
-}
-```
-
-### Two-Tier Registration Architecture
-
-**Tier 1: Shape-Aware Rigid Alignment (~10ms)**
-- Uses centroids AND principal axes (eigenvectors) to capture organ orientation
-- Weighted Procrustes analysis with anatomical stability scores:
-  - Vertebrae/Pelvis: 1.0 (very stable)
-  - Ribs: 0.9
-  - Major organs: 0.6
-  - Lungs: 0.4 (respiratory motion)
-- Produces rotation matrix R + translation vector t
-
-**Tier 2: Deformable Registration (~1s)**
-- Thin Plate Spline (TPS) interpolation on ~5000 boundary points
-- KDTree nearest neighbor correspondence matching
-- Adaptive outlier filtering (3×median or 95th percentile)
-- Smoothing parameter: 2.0 (optimized for tight fitting)
-- Sub-sampled displacement field (4× downsampling for speed)
-
-### Performance Comparison
-
-| Method | Speed | Accuracy | Use Case |
-|--------|-------|----------|----------|
-| **Traditional (Intensity-based)** | 1-60 minutes | 0.5-2mm | High-precision research |
-| **Metadata-driven (This project)** | **1 second** | 1.7mm | Real-time clinical workflows |
-
-### Passport Extraction Benchmark (Script 06)
-
-`06_inferenceAndPassport.py` measures the **complete registration preprocessing pipeline**:
-
-1. **Preprocessing** (resampling, normalization, padding)
-2. **Inference** (ONNX model forward pass)
-3. **Postprocessing** (argmax, resample back to original resolution)
-4. **Passport Extraction** (centroids, eigenvectors, boundary points)
-
-**Purpose:**
-- Quantify passport extraction overhead
-- Determine if Rust optimization is worthwhile for this step
-- Establish baseline for future optimization work
-
-**Key Metrics Tracked:**
-- Total latency breakdown (ms per component)
-- Number of organs detected
-- Passport file size (KB)
-- Passport extraction as % of total pipeline time
-
-**Decision Criteria for Rust Optimization:**
-- If passport extraction > 500ms → **Consider Rust**
-- If passport extraction < 500ms → **Python is sufficient**
-
-**✅ BENCHMARK RESULTS (2026-01-12):**
-- **Passport extraction: 17.6s average (58.5% of total pipeline)** ← **MAJOR BOTTLENECK**
-- **Decision: PROCEED with Rust optimization**
-- **Expected speedup: 6-8× (17.6s → 2-3s)**
-- See `PASSPORT_EXTRACTION_ANALYSIS.md` for detailed analysis
-
-This data-driven approach ensures optimization efforts are focused on actual bottlenecks.
-
-### Registration Scripts
-
-Located in `registration/scripts/`:
-- **`InferenceAndPassport.py`**: Legacy passport extraction (reference implementation)
-- **`AnatomicalRegister.py`**: Core two-tier registration engine (619 lines)
-- **`sanity_check_registration.py`**: Comprehensive validation with multi-view visualizations
-- **`Learn2RegBenchmark.py`**: Batch processing for multiple cases
-- **`ClinicalApp.py`**: Streamlit web UI for clinical deployment
-- **`brain_self_registration_check.py`** / **`lung_self_registration_check.py`**: Self-registration tests (should be ~0mm error)
-
-See `registration/sabber_registration_notes.md` for comprehensive documentation (847 lines).
 
 ## ✅ Comprehensive Validation
 
@@ -232,13 +138,34 @@ python 08_visualize_passport.py <passport.json> --modality ct
 python 09_visualize_spine.py <passport.json> --modality ct
 ```
 
+### Comparing Vanilla vs Optimized
+
+To generate a Dice score and speedup comparison between vanilla TotalSegmentator and the optimized ONNX pipeline:
+
+**CT:**
+```bash
+# 1. Run vanilla baseline (saves masks + ground truth JSON)
+python 03_vanilla_benchmark.py --modality ct --max-samples 20
+
+# 2. Run optimized pipeline
+python 06_inferenceAndPassport.py --modality ct --max-samples 20
+
+# 3. Compare results (generates Dice scores, speedup report)
+python 07_compare_vanilla_vs_optimized.py --modality ct
+# Report: benchmarks/VANILLA_VS_OPTIMIZED_REPORT.md
+```
+
+**MRI:**
+```bash
+# 1. Run vanilla baseline
+python 03_vanilla_benchmark.py --modality mri --max-samples 5
+
+# 2. Run optimized pipeline
+python 06_inferenceAndPassport.py --modality mri --max-samples 5
+
+# 3. Compare results
+python 07_compare_vanilla_vs_optimized.py --modality mri
+# Report: benchmarks/VANILLA_VS_OPTIMIZED_REPORT_MRI.md
+```
+
 **For comprehensive evaluator instructions, see:** **[TESTING_GUIDE.md](TESTING_GUIDE.md)**
-
-## 💡 Recommendation
-For production deployment, use the **Optimized Python-ONNX** pipeline with `--modality ct|mri`. It provides a **4.3x speedup** over Vanilla PyTorch while maintaining clinical accuracy (>0.90 Dice for CT).
-
-**Validated Performance:**
-- **CT**: ~12s average per scan, 0.91 Dice, 100% reliability across 49 scans
-- **MRI**: ~11.2s average per scan, 26-40 organs detected, 100% reliability across 5 scans
-
-For **registration workflows**, the metadata-driven approach offers dramatic speedups (1000x) with acceptable accuracy for most clinical applications.
